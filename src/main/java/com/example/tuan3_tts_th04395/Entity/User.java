@@ -1,5 +1,6 @@
 package com.example.tuan3_tts_th04395.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -8,6 +9,7 @@ import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.time.Instant;
+import java.util.List;
 
 @Getter
 @Setter
@@ -38,4 +40,7 @@ public class User {
     @Column(name = "created_at")
     private Instant createdAt;
 
+    @OneToMany(mappedBy = "assignee", fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<Task> tasks;
 }
