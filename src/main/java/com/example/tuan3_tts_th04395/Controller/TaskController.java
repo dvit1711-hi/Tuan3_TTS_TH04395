@@ -50,4 +50,9 @@ public class TaskController {
 
         return taskService.updateStatus(taskId, status);
     }
+    @GetMapping("/project/{projectId}")
+    public List<Task> getTasksByProject(@PathVariable Integer projectId) {
+
+        return taskService.findByProject(projectId);
+    }
 }
