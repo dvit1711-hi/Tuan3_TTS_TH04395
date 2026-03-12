@@ -21,7 +21,7 @@ public class Project {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "project_id", nullable = false)
-    private Integer id;
+    private Integer projectId;
 
     @Size(max = 100)
     @NotNull

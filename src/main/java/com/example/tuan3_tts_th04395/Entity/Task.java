@@ -20,7 +20,7 @@ public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "task_id", nullable = false)
-    private Integer id;
+    private Integer taskId;
 
     @Size(max = 150)
     @NotNull
@@ -53,7 +53,7 @@ public class Task {
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "assignee_id", nullable = false)
-    private com.example.tuan3_tts_th04395.Entity.User assignee;
+    private User assignee;
 
     @ColumnDefault("getdate()")
     @Column(name = "created_at")
