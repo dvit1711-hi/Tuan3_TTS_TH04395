@@ -30,10 +30,10 @@ public class TaskController {
         return taskService.findByProject(projectId);
     }
 
-    @PostMapping
-    public Task create(@RequestBody Task task) {
-        return taskService.create(task);
-    }
+//    @PostMapping
+//    public Task create(@RequestBody Task task) {
+//        return taskService.create(task);
+//    }
     @PostMapping
     public Task createTask(@RequestBody Task task) {
         return taskService.createTask(task);
@@ -50,9 +50,5 @@ public class TaskController {
 
         return taskService.updateStatus(taskId, status);
     }
-    @GetMapping("/project/{projectId}")
-    public List<Task> getTasksByProject(@PathVariable Integer projectId) {
 
-        return taskService.findByProject(projectId);
-    }
 }

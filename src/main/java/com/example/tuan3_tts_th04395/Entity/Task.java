@@ -1,5 +1,6 @@
 package com.example.tuan3_tts_th04395.Entity;
 
+import com.example.tuan3_tts_th04395.Entity.enums.TaskStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -23,7 +24,6 @@ public class Task {
     private Integer taskId;
 
     @Size(max = 150)
-    @NotNull
     @Column(name = "title", nullable = false, length = 150)
     private String title;
 
@@ -31,26 +31,22 @@ public class Task {
     @Column(name = "description")
     private String description;
 
-    @Size(max = 20)
-    @NotNull
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
-    private String status;
+    private TaskStatus status;
 
     @Size(max = 20)
-    @NotNull
     @Column(name = "priority", nullable = false, length = 20)
     private String priority;
 
     @Column(name = "due_date")
     private LocalDate dueDate;
 
-    @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "project_id", nullable = false)
     private Project project;
 
-    @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "assignee_id", nullable = false)
     private User assignee;
