@@ -1,4 +1,4 @@
-package com.example.tuan3_tts_th04395.Exception;
+package com.example.tuan3_tts_th04395.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

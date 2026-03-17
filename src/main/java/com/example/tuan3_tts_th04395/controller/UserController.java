@@ -1,7 +1,7 @@
-package com.example.tuan3_tts_th04395.Controller;
+package com.example.tuan3_tts_th04395.controller;
 
-import com.example.tuan3_tts_th04395.Entity.User;
-import com.example.tuan3_tts_th04395.Service.UserService;
+import com.example.tuan3_tts_th04395.entity.User;
+import com.example.tuan3_tts_th04395.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 

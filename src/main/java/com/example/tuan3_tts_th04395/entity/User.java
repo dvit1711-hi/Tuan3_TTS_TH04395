@@ -1,4 +1,4 @@
-package com.example.tuan3_tts_th04395.Entity;
+package com.example.tuan3_tts_th04395.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -10,6 +10,7 @@ import org.hibernate.annotations.ColumnDefault;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -43,4 +44,11 @@ public class User {
     @OneToMany(mappedBy = "assignee", fetch = FetchType.LAZY)
     @JsonIgnore
     private List<Task> tasks;
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "User_Roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    private Set<Role> roles;
 }

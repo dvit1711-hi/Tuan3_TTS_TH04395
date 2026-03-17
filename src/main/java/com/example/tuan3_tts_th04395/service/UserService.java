@@ -1,7 +1,7 @@
-package com.example.tuan3_tts_th04395.Service;
+package com.example.tuan3_tts_th04395.service;
 
-import com.example.tuan3_tts_th04395.Entity.User;
-import com.example.tuan3_tts_th04395.Repository.UserRepository;
+import com.example.tuan3_tts_th04395.entity.User;
+import com.example.tuan3_tts_th04395.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
