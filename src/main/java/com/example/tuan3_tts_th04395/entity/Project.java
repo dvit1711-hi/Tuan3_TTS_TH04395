@@ -1,10 +1,12 @@
-package com.example.tuan3_tts_th04395.Entity;
+package com.example.tuan3_tts_th04395.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.OnDelete;
@@ -16,6 +18,8 @@ import java.util.List;
 @Getter
 @Setter
 @Entity
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "Projects")
 public class Project {
     @Id
@@ -36,7 +40,7 @@ public class Project {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "owner_id", nullable = false)
-    private com.example.tuan3_tts_th04395.Entity.User owner;
+    private com.example.tuan3_tts_th04395.entity.User owner;
 
     @ColumnDefault("getdate()")
     @Column(name = "created_at")
