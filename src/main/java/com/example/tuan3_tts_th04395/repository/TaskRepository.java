@@ -1,6 +1,6 @@
-package com.example.tuan3_tts_th04395.Repository;
+package com.example.tuan3_tts_th04395.repository;
 
-import com.example.tuan3_tts_th04395.Entity.Task;
+import com.example.tuan3_tts_th04395.entity.Task;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

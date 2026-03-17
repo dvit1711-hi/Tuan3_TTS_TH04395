@@ -1,10 +1,9 @@
-package com.example.tuan3_tts_th04395.Entity;
+package com.example.tuan3_tts_th04395.entity;
 
-import com.example.tuan3_tts_th04395.Entity.enums.TaskStatus;
+import com.example.tuan3_tts_th04395.entity.enums.TaskStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;

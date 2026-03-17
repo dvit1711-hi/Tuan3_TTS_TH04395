@@ -1,10 +1,11 @@
-package com.example.tuan3_tts_th04395.Controller;
+package com.example.tuan3_tts_th04395.controller;
 
-import com.example.tuan3_tts_th04395.Entity.Task;
-import com.example.tuan3_tts_th04395.Entity.enums.TaskStatus;
-import com.example.tuan3_tts_th04395.Exception.ApiResponse;
-import com.example.tuan3_tts_th04395.Service.TaskService;
+import com.example.tuan3_tts_th04395.entity.Task;
+import com.example.tuan3_tts_th04395.entity.enums.TaskStatus;
+import com.example.tuan3_tts_th04395.exception.ApiResponse;
+import com.example.tuan3_tts_th04395.service.TaskService;
 import jakarta.validation.Valid;
+import org.springframework.security.core.Authentication;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -70,5 +71,13 @@ public ApiResponse<Task> create(@RequestBody @Valid Task task){
         Task task = taskService.updateStatus(taskId, status);
         return new ApiResponse<>(203,"put updateStatus ok",task);
     }
+    @GetMapping("/my-tasks")
+    public ApiResponse<List<Task>> myTasks(Authentication auth){
 
+        return new ApiResponse<>(
+                200,
+                "Success",
+                taskService.getMyTasks(auth.getName())
+        );
+    }
 }

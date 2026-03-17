@@ -1,17 +1,16 @@
-package com.example.tuan3_tts_th04395.Service;
+package com.example.tuan3_tts_th04395.service;
 
-import com.example.tuan3_tts_th04395.Entity.Project;
-import com.example.tuan3_tts_th04395.Entity.Task;
-import com.example.tuan3_tts_th04395.Entity.User;
-import com.example.tuan3_tts_th04395.Entity.enums.TaskStatus;
-import com.example.tuan3_tts_th04395.Exception.CustomException;
-import com.example.tuan3_tts_th04395.Repository.ProjectRepository;
-import com.example.tuan3_tts_th04395.Repository.TaskRepository;
-import com.example.tuan3_tts_th04395.Repository.UserRepository;
+import com.example.tuan3_tts_th04395.entity.Project;
+import com.example.tuan3_tts_th04395.entity.Task;
+import com.example.tuan3_tts_th04395.entity.User;
+import com.example.tuan3_tts_th04395.entity.enums.TaskStatus;
+import com.example.tuan3_tts_th04395.exception.CustomException;
+import com.example.tuan3_tts_th04395.repository.ProjectRepository;
+import com.example.tuan3_tts_th04395.repository.TaskRepository;
+import com.example.tuan3_tts_th04395.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 
@@ -115,5 +114,12 @@ public Task createTask(Task task) {
         task.setStatus(newStatus);
 
         return taskRepository.save(task);
+    }
+    public List<Task> getMyTasks(String username){
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new CustomException("User not found"));
+
+        return taskRepository.findByAssignee_UserId(user.getUserId());
     }
 }
