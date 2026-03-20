@@ -41,6 +41,8 @@ public class TaskServiceTest {
                 .thenReturn(Optional.of(project));
         when(taskRepository.save(any(Task.class)))
                 .thenReturn(task);
+        when(taskRepository.findById(1))
+                .thenReturn(Optional.of(task));
 
         Task result = taskService.createTask(task);
 
