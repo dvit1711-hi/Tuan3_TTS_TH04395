@@ -3,10 +3,13 @@ package com.example.tuan3_tts_th04395;
 import com.example.tuan3_tts_th04395.entity.Project;
 import com.example.tuan3_tts_th04395.entity.Task;
 import com.example.tuan3_tts_th04395.entity.User;
+import com.example.tuan3_tts_th04395.exception.CustomException;
 import com.example.tuan3_tts_th04395.repository.ProjectRepository;
 import com.example.tuan3_tts_th04395.repository.TaskRepository;
 import com.example.tuan3_tts_th04395.repository.UserRepository;
 import com.example.tuan3_tts_th04395.service.TaskService;
+
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -17,104 +20,112 @@ import java.util.Optional;
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.Optional;
-
 public class TaskServiceTest {
+
     @Mock
     private TaskRepository taskRepository;
+
     @Mock
     private ProjectRepository projectRepository;
+
     @Mock
     private UserRepository userRepository;
+
     @InjectMocks
     private TaskService taskService;
-    public TaskServiceTest() {
+
+    private User projectOwner;
+    private User anotherUser;
+    private Project project;
+    private Task task;
+
+    @BeforeEach
+    void setUp() {
         MockitoAnnotations.openMocks(this);
+
+        projectOwner = new User();
+        projectOwner.setUserId(1);
+
+        anotherUser = new User();
+        anotherUser.setUserId(2);
+
+        project = new Project();
+        project.setProjectId(1);
+        project.setOwner(projectOwner);
+
+        task = new Task();
+        task.setTaskId(1);
+        task.setProject(project);
     }
+
     @Test
     void createTask_success() {
-        Task task = new Task();
-        Project project = new Project();
-        project.setProjectId(1);
-        task.setProject(project);
+        // Assignee phải có trước khi tạo
+        task.setAssignee(projectOwner);
 
-        User user = new User();
-        user.setUserId(1);
-        task.setAssignee(user);
-
-        when(projectRepository.findById(1))
-                .thenReturn(Optional.of(project));
-        when(taskRepository.save(any(Task.class)))
-                .thenReturn(task);
-        when(taskRepository.findById(1))
-                .thenReturn(Optional.of(task));
-        when(userRepository.findById(1))
-                .thenReturn(Optional.of(user)); // 👈 bắt buộc
+        when(projectRepository.findById(project.getProjectId())).thenReturn(Optional.of(project));
+        when(userRepository.findById(projectOwner.getUserId())).thenReturn(Optional.of(projectOwner));
+        when(taskRepository.save(any(Task.class))).thenReturn(task);
 
         Task result = taskService.createTask(task);
 
         assertNotNull(result);
         verify(taskRepository).save(any(Task.class));
     }
+
     @Test
     void assignTask_success() {
-        Task task = new Task();
-        task.setTaskId(1);
-        Project project = new Project();
-        User user = new User();
-        user.setUserId(1);
-        project.setOwner(user);
         task.setProject(project);
-        when(taskRepository.findById(1))
-                .thenReturn(Optional.of(task));
-        when(userRepository.findById(1))
-                .thenReturn(Optional.of(user));
-        when(taskRepository.save(any(Task.class)))
-                .thenReturn(task);
-        Task result = taskService.assignTask(1,1);
-        assertEquals(1,result.getAssignee().getUserId());
+
+        when(taskRepository.findById(task.getTaskId())).thenReturn(Optional.of(task));
+        when(userRepository.findById(projectOwner.getUserId())).thenReturn(Optional.of(projectOwner));
+        when(taskRepository.save(any(Task.class))).thenReturn(task);
+
+        Task result = taskService.assignTask(task.getTaskId(), projectOwner.getUserId());
+
+        assertEquals(projectOwner.getUserId(), result.getAssignee().getUserId());
         verify(taskRepository).save(any(Task.class));
     }
+
     @Test
-    void createTask_projectNotFound(){
+    void createTask_projectNotFound() {
+        Project missingProject = new Project();
+        missingProject.setProjectId(99);
+        task.setProject(missingProject);
 
-        Task task = new Task();
-        Project project = new Project();
-        project.setProjectId(99);
+        when(projectRepository.findById(99)).thenReturn(Optional.empty());
 
-        task.setProject(project);
-
-        when(projectRepository.findById(99))
-                .thenReturn(Optional.empty());
-
-        assertThrows(RuntimeException.class, () -> {
-            taskService.createTask(task);
-        });
-    }
-    @Test
-    void assignTask_userNotInProject(){
-
-        Task task = new Task();
-        Project project = new Project();
-        User owner = new User();
-        owner.setUserId(1);
-
-        project.setOwner(owner);
-        task.setProject(project);
-
-        when(taskRepository.findById(1))
-                .thenReturn(Optional.of(task));
-
-        User anotherUser = new User();
-        anotherUser.setUserId(2);
-
-        when(userRepository.findById(2))
-                .thenReturn(Optional.of(anotherUser));
-
-        assertThrows(RuntimeException.class, () -> {
-            taskService.assignTask(1,2);
-        });
+        assertThrows(CustomException.class, () -> taskService.createTask(task));
     }
 
+    @Test
+    void assignTask_userNotInProject() {
+        task.setProject(project);
+
+        when(taskRepository.findById(task.getTaskId())).thenReturn(Optional.of(task));
+        when(userRepository.findById(anotherUser.getUserId())).thenReturn(Optional.of(anotherUser));
+
+        assertThrows(CustomException.class,
+                () -> taskService.assignTask(task.getTaskId(), anotherUser.getUserId()));
+    }
+
+    // Edge case: assignee = null khi tạo task
+    @Test
+    void createTask_assigneeNull() {
+        task.setAssignee(null);
+
+        when(projectRepository.findById(project.getProjectId())).thenReturn(Optional.of(project));
+
+        assertThrows(CustomException.class, () -> taskService.createTask(task));
+    }
+
+    // Edge case: assign task với taskId không tồn tại
+    @Test
+    void assignTask_taskNotFound() {
+        when(taskRepository.findById(999)).thenReturn(Optional.empty());
+
+        assertThrows(CustomException.class,
+                () -> taskService.assignTask(999, projectOwner.getUserId()));
+    }
 
 }

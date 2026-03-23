@@ -67,6 +67,9 @@ public Task createTask(Task task) {
             .orElseThrow(() -> new CustomException("Project not found"));
 
     task.setProject(project);
+    if (task.getAssignee() == null) {
+        throw new CustomException("Assignee cannot be null");
+    }
 //    if (task.getDueDate() != null &&
 //            task.getDueDate().isBefore(LocalDate.now())) {
 //
