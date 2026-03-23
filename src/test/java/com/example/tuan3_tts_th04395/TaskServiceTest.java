@@ -37,17 +37,24 @@ public class TaskServiceTest {
         Project project = new Project();
         project.setProjectId(1);
         task.setProject(project);
+
+        User user = new User();
+        user.setUserId(1);
+        task.setAssignee(user);
+
         when(projectRepository.findById(1))
                 .thenReturn(Optional.of(project));
         when(taskRepository.save(any(Task.class)))
                 .thenReturn(task);
         when(taskRepository.findById(1))
                 .thenReturn(Optional.of(task));
+        when(userRepository.findById(1))
+                .thenReturn(Optional.of(user)); // 👈 bắt buộc
 
         Task result = taskService.createTask(task);
 
         assertNotNull(result);
-        verify(taskRepository).save(task);
+        verify(taskRepository).save(any(Task.class));
     }
     @Test
     void assignTask_success() {
@@ -66,6 +73,47 @@ public class TaskServiceTest {
                 .thenReturn(task);
         Task result = taskService.assignTask(1,1);
         assertEquals(1,result.getAssignee().getUserId());
+        verify(taskRepository).save(any(Task.class));
+    }
+    @Test
+    void createTask_projectNotFound(){
+
+        Task task = new Task();
+        Project project = new Project();
+        project.setProjectId(99);
+
+        task.setProject(project);
+
+        when(projectRepository.findById(99))
+                .thenReturn(Optional.empty());
+
+        assertThrows(RuntimeException.class, () -> {
+            taskService.createTask(task);
+        });
+    }
+    @Test
+    void assignTask_userNotInProject(){
+
+        Task task = new Task();
+        Project project = new Project();
+        User owner = new User();
+        owner.setUserId(1);
+
+        project.setOwner(owner);
+        task.setProject(project);
+
+        when(taskRepository.findById(1))
+                .thenReturn(Optional.of(task));
+
+        User anotherUser = new User();
+        anotherUser.setUserId(2);
+
+        when(userRepository.findById(2))
+                .thenReturn(Optional.of(anotherUser));
+
+        assertThrows(RuntimeException.class, () -> {
+            taskService.assignTask(1,2);
+        });
     }
 
 
