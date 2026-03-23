@@ -1,0 +1,10 @@
+spring:
+  datasource:
+    url: jdbc:sqlserver://localhost:1433;databaseName=TTS_TH04395;encrypt=true;trustServerCertificate=true;
+    username: prod_user
+    password: prod_pass
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
