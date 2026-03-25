@@ -3,8 +3,16 @@ spring:
     url: jdbc:sqlserver://localhost:1433;databaseName=TTS_TH04395;encrypt=true;trustServerCertificate=true;
     username: sa
     password: 123
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
 
   jpa:
+    database-platform: org.hibernate.dialect.SQLServerDialect
     hibernate:
       ddl-auto: update
     show-sql: true
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html

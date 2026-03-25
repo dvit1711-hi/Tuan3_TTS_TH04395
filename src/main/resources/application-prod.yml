@@ -1,10 +1,18 @@
 spring:
   datasource:
-    url: jdbc:sqlserver://localhost:1433;databaseName=TTS_TH04395;encrypt=true;trustServerCertificate=true;
+    url: jdbc:sqlserver://prod-server:1433;databaseName=TTS_TH04395
     username: prod_user
     password: prod_pass
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
 
   jpa:
+    database-platform: org.hibernate.dialect.SQLServerDialect
     hibernate:
       ddl-auto: validate
     show-sql: false
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
