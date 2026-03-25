@@ -1,6 +1,7 @@
 package com.example.tuan3_tts_th04395.entity;
 
 import com.example.tuan3_tts_th04395.entity.enums.TaskStatus;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;

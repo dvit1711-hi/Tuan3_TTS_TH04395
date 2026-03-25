@@ -3,6 +3,8 @@ package com.example.tuan3_tts_th04395.service;
 import com.example.tuan3_tts_th04395.entity.Project;
 import com.example.tuan3_tts_th04395.entity.Task;
 import com.example.tuan3_tts_th04395.entity.User;
+import com.example.tuan3_tts_th04395.entity.dto.TaskRequest;
+import com.example.tuan3_tts_th04395.entity.dto.TaskResponse;
 import com.example.tuan3_tts_th04395.entity.enums.TaskStatus;
 import com.example.tuan3_tts_th04395.exception.CustomException;
 import com.example.tuan3_tts_th04395.repository.ProjectRepository;
@@ -10,7 +12,10 @@ import com.example.tuan3_tts_th04395.repository.TaskRepository;
 import com.example.tuan3_tts_th04395.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 
@@ -22,90 +27,84 @@ public class TaskService {
     private final UserRepository userRepository;
     private final ProjectRepository projectRepository;
 
-    public List<Task> findAll() {
-        return taskRepository.findAll();
-    }
-    public List<Task> findAllById(Integer taskId) {
-        return taskRepository.findAllById(Collections.singleton(taskId));
-    }
-
-    public List<Task> findByUser(Integer userId) {
-        List<Task> tasks = taskRepository.findByAssignee_UserId(userId);
-        if (tasks.isEmpty()) {
-            throw new CustomException( "User has no tasks or user not found");
-        }
-        return tasks;
+    @Transactional(readOnly = true)
+    public List<TaskResponse> findAll() {
+        return taskRepository.findAll()
+                .stream()
+                .map(TaskResponse::fromEntity)
+                .toList();
     }
 
-    public List<Task> findByProject(Integer projectId) {
-
-        List<Task> tasks = taskRepository.findByProject_ProjectId(projectId);
-        if (tasks.isEmpty()) {
-            throw new CustomException( "Project has no tasks or project not found");
-        }
-        return tasks;
+    @Transactional(readOnly = true)
+    public TaskResponse findById(Integer taskId) {
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new CustomException("Task not found"));
+        return TaskResponse.fromEntity(task);
     }
 
-//    public Task create(Task task) {
-//
-//        Integer userId = task.getAssignee().getUserId();
-//        Integer projectId = task.getProject().getProjectId();
-//
-//        task.setAssignee(userRepository.findById(userId)
-//                .orElseThrow(() -> new RuntimeException("User not found")));
-//
-//        task.setProject(projectRepository.findById(projectId)
-//                .orElseThrow(() -> new RuntimeException("Project not found")));
-//
-//        return taskRepository.save(task);
-//    }
-public Task createTask(Task task) {
+    @Transactional(readOnly = true)
+    public List<TaskResponse> findByUser(Integer userId) {
+        userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException("User not found"));
 
-    Integer projectId = task.getProject().getProjectId();
-
-    Project project = projectRepository.findById(projectId)
-            .orElseThrow(() -> new CustomException("Project not found"));
-
-    task.setProject(project);
-    if (task.getAssignee() == null) {
-        throw new CustomException("Assignee cannot be null");
+        return taskRepository.findByAssignee_UserId(userId)
+                .stream()
+                .map(TaskResponse::fromEntity)
+                .toList();
     }
-//    if (task.getDueDate() != null &&
-//            task.getDueDate().isBefore(LocalDate.now())) {
-//
-//        throw new CustomException("Deadline must be greater than current date");
-//    }
 
-    // lấy assignee
-    Integer userId = task.getAssignee().getUserId();
+    @Transactional(readOnly = true)
+    public List<TaskResponse> findByProject(Integer projectId) {
+        projectRepository.findById(projectId)
+                .orElseThrow(() -> new CustomException("Project not found"));
 
-    User user = userRepository.findById(userId)
-            .orElseThrow(() -> new CustomException("User not found"));
+        return taskRepository.findByProject_ProjectId(projectId)
+                .stream()
+                .map(TaskResponse::fromEntity)
+                .toList();
+    }
 
-    task.setAssignee(user);
+    @Transactional
+    public TaskResponse createTask(TaskRequest request) {
+        Project project = projectRepository.findById(request.getProjectId())
+                .orElseThrow(() -> new CustomException("Project not found"));
 
-    task.setStatus(TaskStatus.TODO);
+        User assignee = userRepository.findById(request.getAssigneeId())
+                .orElseThrow(() -> new CustomException("User not found"));
 
-    return taskRepository.save(task);
-}
-    public Task assignTask(Integer taskId, Integer userId) {
+        Task task = new Task();
+        task.setTitle(request.getTitle().trim());
+        task.setDescription(request.getDescription());
+        task.setPriority(request.getPriority().trim().toUpperCase());
+        task.setDueDate(request.getDueDate());
+        task.setProject(project);
+        task.setAssignee(assignee);
+        task.setStatus(TaskStatus.TODO);
+        task.setCreatedAt(Instant.now());
 
+        Task saved = taskRepository.save(task);
+        return TaskResponse.fromEntity(saved);
+    }
+
+    @Transactional
+    public TaskResponse assignTask(Integer taskId, Integer userId) {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new CustomException("Task not found"));
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException("User not found"));
 
-        // kiểm tra user thuộc project
-        if (!task.getProject().getOwner().getUserId().equals(userId)) {
-            throw new CustomException("User does not belong to this project");
-        }
-
         task.setAssignee(user);
 
-        return taskRepository.save(task);
+        Task updated = taskRepository.save(task);
+        return TaskResponse.fromEntity(updated);
     }
-    public Task updateStatus(Integer taskId, TaskStatus newStatus) {
+
+    @Transactional
+    public TaskResponse updateStatus(Integer taskId, TaskStatus newStatus) {
+        if (newStatus == null) {
+            throw new CustomException("Status cannot be null");
+        }
 
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new CustomException("Task not found"));
@@ -116,13 +115,19 @@ public Task createTask(Task task) {
 
         task.setStatus(newStatus);
 
-        return taskRepository.save(task);
+        Task updated = taskRepository.save(task);
+        return TaskResponse.fromEntity(updated);
     }
-    public List<Task> getMyTasks(String username){
 
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new CustomException("User not found"));
+    @Transactional(readOnly = true)
+    public List<TaskResponse> getMyTasks(String principal) {
+        User user = userRepository.findByUsername(principal)
+                .or(() -> userRepository.findByEmail(principal))
+                .orElseThrow(() -> new CustomException("User not found: " + principal));
 
-        return taskRepository.findByAssignee_UserId(user.getUserId());
+        return taskRepository.findByAssignee_UserId(user.getUserId())
+                .stream()
+                .map(TaskResponse::fromEntity)
+                .toList();
     }
 }
